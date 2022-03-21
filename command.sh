@@ -90,3 +90,26 @@ kubectl delete service quantum-game-2
 kubectl apply -f kind/ingress-nginx.yaml
 # upstream version: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
 
+kubectl wait --namespace ingress-nginx \
+    --for=condition=ready pod \
+    --selector=app.kubernetes.io/component=controller \
+    --timeout=90s
+
+kubectl get all --namespace ingress-nginx
+kubectl get pods --namespace ingress-nginx -w
+
+kubectl apply -f quantum-game-2/qg2-ingress.yaml
+curl localhost
+
+
+kubectl get pods -A
+
+kubectl scale deploy quantum-game-2 --replicas=3
+kubectl get pods
+
+# Stern for reading logs: https://github.com/wercker/stern/releases/latest
+
+./stern_linux_amd64 --all-namespaces -l app=quantum-game-2
+
+kubectl scale deploy quantum-game-2 --replicas=1
+
